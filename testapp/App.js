@@ -12,9 +12,12 @@ import {Text, SafeAreaView} from 'react-native';
 import tape from 'tape';
 import suite from 'abstract-leveldown/test';
 import ReactNativeLeveldown from 'react-native-leveldown';
+import LevelUp from 'levelup';
+import {Buffer} from 'buffer';
 
 const App: () => React$Node = () => {
   const [logs, setLogs] = React.useState('Running tests...');
+  const [sec, setSec] = React.useState('Waiting.');
   React.useEffect(() => {
     global.__dirname = '<unknown dir name>';
     const test = tape.createHarness();
@@ -45,6 +48,18 @@ const App: () => React$Node = () => {
       .on('end', function (row) {
         newLogs += `Ran ${testCount} tests; ${failedTests.length} failed`;
         setLogs(newLogs);
+
+        async function test() {
+          const db = LevelUp(
+            new ReactNativeLeveldown(Math.random().toString()),
+          );
+          await db.put('key', Buffer.from([1, 2, 3, 0, 4, 5, 6]));
+          const res = await db.get('key');
+          setSec('Result from key was: ' + JSON.stringify(res));
+          await db.close();
+        }
+
+        test().then(() => console.log('Test done!')).catch(console.error);
       });
 
     const testCommon = suite.common({
@@ -59,6 +74,7 @@ const App: () => React$Node = () => {
   return (
     <SafeAreaView style={{flex: 1, overflow: "scroll"}}>
       <Text style={{flex: 1}}>{logs}</Text>
+      <Text style={{flex: 1}}>{sec}</Text>
     </SafeAreaView>
   );
 };

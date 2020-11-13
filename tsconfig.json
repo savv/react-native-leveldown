@@ -7,7 +7,8 @@
     "moduleResolution": "node",
     "target": "esnext",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+"skipLibCheck": true
   },
   "compileOnSave": true,
   "files": ["./index.ts"]
